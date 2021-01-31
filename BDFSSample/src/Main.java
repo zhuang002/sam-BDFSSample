@@ -1,9 +1,11 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Main {
 
-	static int[][] treeAr=null;
+	static Node root=null;
+	static HashMap<Integer, Node> nodeMap=new HashMap<>();
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -16,22 +18,20 @@ public class Main {
 	
 	private static int getTreeDepthDFS() {
 		// TODO Auto-generated method stub
-		return getDepthOf(0);
+		return getDepthOf(root);
 	}
 
-	private static int getDepthOf(int root) {
+	private static int getDepthOf(Node root) {
 		// TODO Auto-generated method stub
-		int depth=Integer.MIN_VALUE;
-		
-		for (int i=0;i<treeAr[0].length;i++) {
-			if (treeAr[root][i]==1) {
-				int subDepth=getDepthOf(i);
-				if (depth<subDepth)
-					depth=subDepth;
-			}
-		}
-		if (depth==Integer.MIN_VALUE)
+		if (root.children.isEmpty()) {
 			return 0;
+		}
+		int depth=Integer.MIN_VALUE;
+		for (Node child:root.children) {
+			int childDepth=getDepthOf(child);
+			if (depth<childDepth)
+				depth=childDepth;
+		}
 		return depth+1;
 	}
 
@@ -39,18 +39,14 @@ public class Main {
 		// TODO Auto-generated method stub
 		int depth=0;
 		
-		ArrayList<Integer> current=new ArrayList<>();
-		current.add(0);
-		ArrayList<Integer> next=new ArrayList<>();
+		ArrayList<Node> current=new ArrayList<>();
+		current.add(root);
+		ArrayList<Node> next=new ArrayList<>();
 		
 		while (!current.isEmpty()) {
-			for (Integer node:current) {
+			for (Node node:current) {
 				// add all children of node to next list
-				for (int i=0;i<treeAr[0].length;i++) {
-					if (treeAr[node][i]==1) {
-						next.add(i);
-					}
-				}
+				next.addAll(node.children);
 			}
 			depth++;
 			current=next;
@@ -66,18 +62,31 @@ public class Main {
 		int lines=sc.nextInt();
 		int nodes=sc.nextInt();
 		
-		treeAr=new int[nodes][nodes];
-		for (int i=0;i<nodes;i++) {
-			for (int j=0;j<nodes;j++) {
-				treeAr[i][j]=0;
-			}
-		}
+		root=new Node();
+		root.id=1;
+		nodeMap.put(1, root);
 		
 		for (int i=0;i<lines;i++) {
-			int parent=sc.nextInt()-1;
-			int child=sc.nextInt()-1;
-			treeAr[parent][child]=1;
+			int parent=sc.nextInt();
+			int child=sc.nextInt();
+			Node parentNode=nodeMap.get(parent);
+			
+			Node childNode=null;
+			if (nodeMap.containsKey(child))
+			{
+				childNode=nodeMap.get(child);
+			} else {
+				childNode=new Node();
+				childNode.id=child;
+				nodeMap.put(child, childNode);
+			}
+			parentNode.children.add(childNode); 
 		}
 	}
 
+}
+
+class Node {
+	int id;
+	ArrayList<Node> children=new ArrayList<>();
 }
